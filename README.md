@@ -6,6 +6,8 @@
 
 下表是开发机（自定义安装到 `D:\Strata`）的示例；其他机器上插件会**自动探测** Strata 安装位置（`STRATA_*` 环境变量 > `D:\Strata\terminal\current` > `%LOCALAPPDATA%\Strata\terminal\current`（Windows 一键安装） > `~/.local/share/strata/terminal/current`（Linux/macOS）），探测结果可在「模型与参数 → 安装路径」中手动修正。
 
+**运行配置文件（`strata-<model>.json`）的发现**与 Strata 自身（`strata_control/discovery.py`）同一套规则，按顺序扫描多个目录、取先命中者，并在面板中列出全部命中目录：面板设置的目录 > `STRATA_INSTALL_DIR` > `STRATA_DATA_DIR\install` > 终端自身目录 > `%APPDATA%\Strata\settings.json`（或 `~/.config/strata/settings.json`）记住的 `installs` > 桌面应用共享的 `<components>\..\install` 及其 `app-settings.json` 记住的目录；回收站/Trash 中的目录被忽略，`*.shared-settings.json` 不算运行配置。保存参数时写回该文件**实际所在**的目录。
+
 | 项目 | 开发机示例值 |
 | --- | --- |
 | strata CLI | `D:\Strata\terminal\current\bin\strata.cmd`（→ `0.1.49.2`） |
