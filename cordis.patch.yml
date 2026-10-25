@@ -1,0 +1,7 @@
+# 挂载配置故意留空：Strata 安装路径由插件在运行时自动探测
+# （STRATA_* 环境变量 > 常见安装位置 > 兜底值），也可在面板「安装路径」中手动修正。
+- insert:
+    - id: strata-ai-center
+      name: 'dsh-strata-ai-center'
+      config:
+        defaultPort: 8080
