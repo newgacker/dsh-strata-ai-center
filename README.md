@@ -8,6 +8,8 @@
 
 **运行配置文件（`strata-<model>.json`）的发现**与 Strata 自身（`strata_control/discovery.py`）同一套规则，按顺序扫描多个目录、取先命中者，并在面板中列出全部命中目录：面板设置的目录 > `STRATA_INSTALL_DIR` > `STRATA_DATA_DIR\install` > 终端自身目录 > `%APPDATA%\Strata\settings.json`（或 `~/.config/strata/settings.json`）记住的 `installs` > 桌面应用共享的 `<components>\..\install` 及其 `app-settings.json` 记住的目录；回收站/Trash 中的目录被忽略，`*.shared-settings.json` 不算运行配置。保存参数时写回该文件**实际所在**的目录。
 
+**「本机安装路径」的字段回填（v2.4）**：每次请求都按实际磁盘解析——保存值存在则沿用，无效时自动发现并回填（CLI/终端目录按常见安装位置探测、安装根目录由终端位置推导、组件目录按 `STRATA_COMPONENTS_DIR > <root>\components > %LOCALAPPDATA%\Strata\components`、数据目录按 Strata 设置文件的 `data_dir`（后改者胜）> `Documents\Strata` 含模型 > 安装根旁默认、首选配置目录取第一个实际含配置的目录）。面板中每个字段标注来源（已保存/环境变量/自动探测/设置文件/未找到），保存参数后回填值即固化。
+
 | 项目 | 开发机示例值 |
 | --- | --- |
 | strata CLI | `D:\Strata\terminal\current\bin\strata.cmd`（→ `0.1.49.2`） |
