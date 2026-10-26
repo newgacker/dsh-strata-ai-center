@@ -45,14 +45,14 @@
 
 ### 4.2 运行配置读写（`serve/runconfig.py` 规则）
 - 保存时：先备份 `.bak`，写临时文件再 rename；**只动认识的键，其余原样保留**
-- 引擎旗标写 `args`（`--vram-reserve-mib`、`--kv-resident`、`--max-context`、`--kv`、`--pcie-frac`），顶层镜像字段（`context`/`kv`/`vram_reserve_mib`）同步，`args_written` 若存在也同步；**args 是权威，镜像可能滞后**
+- 引擎旗标写 `args`（`--vram-reserve-mib`、`--kv-resident`、`--max-context`、`--kv`、`--pcie-frac`），顶层镜像字段（`context`/`kv`/`vram_reserve_mib`）同步，`args_written` 若存在也同步；**args 是权威，镜像可能滞后**；`--kv-resident` 与 `--pcie-frac`：0/无效=移除已有旗标（回到调优/引擎自适应；v2.5.6 统一了 kv-resident 口径，此前是「>0 才写、从不删」）
 - "缺省即默认"键（`api_monitor`/`idle_unload_s`/`fit_max_tokens`/`engine_silence_s`/`anthropic_thinking`）：未设置=删除键走默认，回读解析成生效值
 - `anthropic_thinking` 是强校验枚举 `model|on_request`，**非法值会让服务器拒绝启动**——只写合法值
 - 引擎在线时同时 `POST /config {"set": {...}}` 同步运行实例（它写自己持有的 profile 配置文件，该实例**下次启动**才生效）；`reasoning_effort`/`presence_penalty`/context/kv 不在 /config 支持范围，只写 D: 文件
 - 表单真值来源 = 回读 `strata-<model>.json`（`readRunConfigSnapshot`，args 优先）；与运行实例不一致的键经 `liveDiffs` 在面板黄色提示
 
 ### 4.3 启停与升级
-- 启动：`strata.cmd launch --model <id> --context <tokens> --kv <fmt> --vision <mode> --mtp on|off --access local --port 8080 --yes --no-tui [--parallel N] --set kv-resident=… --set vram-reserve-mib=… [--set pcie-frac=…] [--set STRATA_X=V…] [--restart(在线时)]`；环境 = `STRATA_INSTALL_DIR/COMPONENTS_DIR/DATA_DIR` (+可选代理 127.0.0.1:7897 与 hf-mirror，默认关)。CLI 缺失时回退 `python serve/server.py --engine strata --config <发现的配置> --port …`（同 run-*.bat）
+- 启动：`strata.cmd launch --model <id> --context <tokens> --kv <fmt> --vision <mode> --mtp on|off --access local --port 8080 --yes --no-tui [--parallel N] [--set kv-resident=…(仅 >0 时)] --set vram-reserve-mib=… [--set pcie-frac=…] [--set STRATA_X=V…] [--restart(在线时)]`；环境 = `STRATA_INSTALL_DIR/COMPONENTS_DIR/DATA_DIR` (+可选代理 127.0.0.1:7897 与 hf-mirror，默认关)。CLI 缺失时回退 `python serve/server.py --engine strata --config <发现的配置> --port …`（同 run-*.bat）
 - 引擎环境变量（`engineEnv`）：写入 `strata-<model>.json` 的 `env` 块 + `launch --set KEY=VALUE`（launch 的 `settings.as_argv_changes` 把非 `--` 且 `STRATA_` 开头的键分流进 `cfg.env`）+ 子进程环境，`server.py child_env` 保证引擎进程收到。`STRATA_ROUTE_TAIL_SKIP` 有专用数字输入框（空=未设置；7=推荐，缺专家 12-16GB 卡 +10~20% 解码；0=强制关；NVFP4 包强制关），直接绑定 engineEnv
 - 停止：`strata launch --stop`（整实例停+释放显存）；卸载显存：`POST /unload`（**必须 `Content-Type: application/json`**，否则 415；auto_load 下次请求自动重载）
 - 升级：`strata update --check --output json --feed <官方源>`（只读）；正式升级先停服务（否则 exit 7）再后台跑 `strata update --output jsonl [--force]`，日志 `%TEMP%\dsh-strata-ai-center-update.log`，UI 3s 轮询 `/update/status`；回滚 `strata components rollback`（仅当 `.updates/state.json` 的 engine.previous 非空）。**必须显式 `--feed` GitHub 官方源**（组件目录记住的是离线源 `D:\Strata\local-feed`，永远显示已最新）；查新需代理
