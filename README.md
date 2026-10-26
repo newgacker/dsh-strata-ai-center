@@ -54,6 +54,7 @@
 * **检查更新**：`strata update --check --output json --feed <官方源>`（只读）。注意组件目录记住的更新源可能是本地离线源（离线安装时留下，会永远显示"已最新"），因此默认显式使用 GitHub 官方签名源；需要代理的环境在「安装路径」卡片勾选代理后检查/升级走代理，也可把源改成本地目录做离线安装。报告含引擎/Control/桌面应用三部分与 `serving` 提示。
 * **执行升级**：先 `strata launch --stop` 停止服务，再后台运行 `strata update --output jsonl [--force]`（下载签名包 → 校验哈希/签名 → 测试启动成功才切换；旧版本保留）。进度写入 `%TEMP%\dsh-strata-ai-center-update.log`，页面每 3 秒轮询展示日志尾部与最终结果。
 * **回滚**：`strata components rollback`（仅当上次升级保留了 previous 时可用）。
+* **版本混淆与升级锁提示（v2.5.7）**：运行实例的引擎版本与 `state.json` 的 active 版本不一致（如引擎是组件目录外的本地构建）时，升级页顶部出现黄色横幅，讲清「升级/回滚只改组件目录、不改运行实例；要让新组件生效需停止后重新启动」。`components/.updates/update.lock` 为 0 字节且 30 分钟未更新时视为上次 updater 崩溃残留，执行升级前自动清理；锁新鲜（或非空）则拒绝升级并给出路径与修改时间（`/diagnose` 含 `updateLock` 探针）。
 
 ## 目录结构
 
