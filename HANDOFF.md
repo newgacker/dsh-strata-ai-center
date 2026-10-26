@@ -37,7 +37,7 @@
 ## 4. 关键对接规则（全部从 Strata 源码移植，勿凭感觉改）
 
 ### 4.1 路径自动发现
-- **终端目录**：根候选 `STRATA_INSTALL_DIR` > `D:\Strata` > `%LOCALAPPDATA%\Strata` > `~/.local/share/strata`；每个根先试 `terminal\current`，**没有 current 就扫 `terminal\<版本目录>` 取最大版本**（v2.4.2 修的坑）
+- **终端目录与 CLI**：根候选 `STRATA_INSTALL_DIR` > `D:\Strata` > `%LOCALAPPDATA%\Strata` > `~/.local/share/strata`；每个根先试 `terminal\current`，**没有 current 就扫 `terminal\<版本目录>` 取最大版本**（v2.4.2 修的坑）；**v2.5.5**：CLI 还认根级 `bin\strata(.cmd)`（「源码 checkout+本地构建」布局，例：`D:\Strata\bin\strata.cmd`）；无 `bin\` 但含 `python\python(.exe)`+`serve\server.py` 的终端目录也认（serve 回退启动结构）；根命中条件放宽为「bin 终端 / serve 终端 / 根级 CLI」任一即可；`detected` 增加 `terminalKind`（bin/serve），`/diagnose` 探针增加 `rootHasCli`/`currentHasServe`/`versions[].hasServe`。
 - **运行配置目录**（移植 `strata_control/discovery.py places()`）：面板目录 > `STRATA_INSTALL_DIR` > `STRATA_DATA_DIR\install` > 终端自身目录 > `%APPDATA%\Strata\settings.json` 的 `installs`（`STRATA_SETTINGS_FILE` 可覆盖）> `<components>\..\install` 及其 `app-settings.json` 的 `installs`；忽略回收站/Trash；排除 `*.shared-settings.json`；同名配置先命中者优先
 - **组件目录**（`engine_component.components_dir()`）：`STRATA_COMPONENTS_DIR` > `<root>\components` > `%LOCALAPPDATA%\Strata\components`，须含 `engine/` 或 `.updates/`
 - **数据目录**（`discovery.data_dir()`）：`STRATA_DATA_DIR` > 设置文件 `data_dir`（own 与 app 后改者胜）> `app-settings.json` > `Documents\Strata`（含 OneDrive，须含模型）> `<root>-Models`
