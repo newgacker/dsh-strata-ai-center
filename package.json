@@ -1,6 +1,6 @@
 {
   "name": "dsh-strata-ai-center",
-  "version": "2.5.10",
+  "version": "2.5.11",
   "description": "AI管理中心 (Strata Engine Manager) — 在 DeepSeek Harness (DSH) 左侧栏「记忆系统」下方管理本机 Strata 引擎：经 strata launch 启停模型、编辑 strata-<model>.json 运行配置、组件升级与回滚，并从 /health /v1/status /v1/telemetry /metrics 读取真实监控数据。安装路径自动探测，开箱即用。",
   "type": "module",
   "main": "./lib/index.js",
