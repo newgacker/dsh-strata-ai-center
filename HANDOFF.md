@@ -50,7 +50,8 @@
 - "缺省即默认"键（`api_monitor`/`idle_unload_s`/`fit_max_tokens`/`engine_silence_s`/`anthropic_thinking`）：未设置=删除键走默认，回读解析成生效值
 - `anthropic_thinking` 是强校验枚举 `model|on_request`，**非法值会让服务器拒绝启动**——只写合法值
 - 引擎在线时同时 `POST /config {"set": {...}}` 同步运行实例（它写自己持有的 profile 配置文件，该实例**下次启动**才生效）；`reasoning_effort`/`presence_penalty`/context/kv 不在 /config 支持范围，只写 D: 文件
-- 表单真值来源 = 回读 `strata-<model>.json`（`readRunConfigSnapshot`，args 优先）；与运行实例不一致的键经 `liveDiffs` 在面板黄色提示
+- 表单真值来源 = 回读 `strata-<model>.json`（`readRunConfigSnapshot`，args 优先）；与运行实例不一致的键经 `liveDiffs` 在面板黄色提示；**spec 是例外（v2.5.12）**：`/metrics engine.spec` 是**生效 verify 窗**不是旗标原值（strata 源码 `generate.cpp` L3208-3218：suffix-draft 默认开且未显式 `--mtp-max-t` 时 `mtp_max_t=spec`、窗=`min(spec+2,8)`；`--lookup-chain K` 再 max/min 加长，上限 8），差异表比对「由文件旗标+修饰旗标算出的预期生效值 vs 引擎上报值」，直接比旗标会永久误报（本机 `--spec 4` → 上报 6）；旗标缺省/0 → 不可比、跳过该行
+- 跨档案警告（v2.5.12）：`/status.engine.configFile/panelConfigFile/configFileMatches`——运行实例实际加载的档案（GET `/config` 的 `file`；经 Strata Control/托盘预设起的是 `AppData\Local\Strata\launch\<model>-<preset>.json`，如本机 `iq3_s-256k.json`）≠ 面板管理的 `strata-<model>.json` 时 client 红条警告「面板保存不会写进实例实际用的档案」；经面板「启动」加载的才是面板档案
 
 ### 4.3 启停与升级
 - 启动：`strata.cmd launch --model <id> --context <tokens> --kv <fmt> --vision <mode> --mtp on|off --access local --port 8080 --yes --no-tui [--parallel N] [--set kv-resident=…(仅 >0 时)] --set vram-reserve-mib=… [--set pcie-frac=…] [--set spec=… / spec-min-p=… / prefill=auto:N / pool-workers=… / adapt-every=… / adapt-swaps=… / adapt-decay=…（v2.5.10，仅有效值时发；0/空=不发，旗标增删由运行配置写入负责）] [--set STRATA_X=V…] [--restart(在线时)]`；环境 = `STRATA_INSTALL_DIR/COMPONENTS_DIR/DATA_DIR` (+可选代理 127.0.0.1:7897 与 hf-mirror，默认关)。CLI 缺失时回退 `python serve/server.py --engine strata --config <发现的配置> --port …`（同 run-*.bat）
